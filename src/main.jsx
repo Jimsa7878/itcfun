@@ -6,7 +6,7 @@ import { ensureAnonymousSession, supabase } from './lib/supabase';
 const CATEGORIES = [
   { name: 'SONG TITLE', color: 'green', icon: '♫', rule: 'Name the song.' },
   { name: 'EXACT YEAR', color: 'pink', icon: '#', rule: 'Name the release year.' },
-  { name: 'ARTIST / BAND', color: 'yellow', icon: '★', rule: 'Name the artist or band.' },
+  { name: 'ARTIST / BAND', displayName: 'ARTIST/\nBAND', color: 'yellow', icon: '★', rule: 'Name the artist or band.' },
   { name: 'DECADE', color: 'purple', icon: '◉', rule: 'Name the release decade.' },
   { name: 'YEAR +/- 3', color: 'blue', icon: '±', rule: 'Within 3 years is correct.' }
 ];
@@ -331,7 +331,7 @@ function App() {
              <p className="panel-kicker">Next challenge</p>
              <div className={`host-category host-category--${hostRound.category.color} ${hostRound.phase === 'done' ? 'host-category--done' : ''}`}>
                {hostRound.phase !== 'done' && <span className="host-category__icon" aria-hidden="true">{hostRound.category.icon}</span>}
-               <span>{hostRound.phase === 'done' ? "TIME'S UP!" : hostRound.category.name}</span>
+              <span>{hostRound.phase === 'done' ? "TIME'S UP!" : (hostRound.category.displayName || hostRound.category.name)}</span>
              </div>
              <div className={`host-disco-ball ${hostRound.phase === 'done' ? 'host-disco-ball--done' : ''}`}>
                <img className="host-disco-ball__image" src={DISCO_BALL_URL} alt="" aria-hidden="true" />
