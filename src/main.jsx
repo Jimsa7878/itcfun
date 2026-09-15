@@ -194,7 +194,7 @@ function App() {
     const handleKeyDown = (event) => {
       if (event.code !== 'Space' || event.repeat) return;
       event.preventDefault();
-      if (!['countdown', 'running'].includes(hostRound.phase)) startHostRound();
+      if (!['countdown', 'running'].includes(hostRound.phase)) newHostRound();
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
