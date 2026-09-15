@@ -11,6 +11,7 @@ const CATEGORIES = [
   { name: 'YEAR +/- 3', color: 'blue', icon: '±', rule: 'Within 3 years is correct.' }
 ];
 const ROUND_DURATIONS = [15, 30, 45, 60];
+const COUNTDOWN_SECONDS = 5;
 const BOARD_SIZE = 25;
 const STORAGE_KEY = 'itcfun-local-state';
 const DISCO_BALL_URL = `${import.meta.env.BASE_URL}discoball.gif`;
@@ -257,13 +258,13 @@ function App() {
   };
 
   const startHostRound = () => {
-    const nextRound = { ...hostRound, phase: 'countdown', remaining: 3 };
+    const nextRound = { ...hostRound, phase: 'countdown', remaining: COUNTDOWN_SECONDS };
     setHostRound(nextRound);
     saveRound(nextRound);
   };
 
   const newHostRound = async () => {
-    const nextRound = { category: CATEGORIES[Math.floor(Math.random() * CATEGORIES.length)], phase: 'countdown', remaining: 3, duration: hostRound.duration || 45 };
+    const nextRound = { category: CATEGORIES[Math.floor(Math.random() * CATEGORIES.length)], phase: 'countdown', remaining: COUNTDOWN_SECONDS, duration: hostRound.duration || 45 };
     setHostRound(nextRound);
     await saveRound(nextRound);
   };
@@ -346,7 +347,7 @@ function App() {
                <img className="host-disco-ball__image" src={DISCO_BALL_URL} alt="" aria-hidden="true" />
               <div className={`host-timer ${hostRound.phase === 'done' ? 'host-timer--done' : ''} ${hostRound.phase === 'countdown' && hostRound.remaining === 0 ? 'host-timer--go' : ''} ${hostRound.phase === 'running' && hostRound.remaining <= 5 ? 'host-timer--warning' : ''}`}>{countdownText}</div>
              </div>
-          <p>{hostRound.phase === 'ready' ? 'Category ready. Start when every team is set.' : hostRound.phase === 'running' ? `${hostRound.duration} seconds on the clock.` : hostRound.phase === 'countdown' ? 'Get ready...' : "Time's up. Reveal the answer out loud."}</p>
+          <p>{hostRound.phase === 'ready' ? 'Category ready. Start when every team is set.' : hostRound.phase === 'running' ? `${hostRound.duration} seconds on the clock.` : hostRound.phase === 'countdown' ? 'Get ready. Song starts after the countdown.' : "Time's up. Reveal the answer out loud."}</p>
           <div className="host-actions"><button className="button button--primary" onClick={newHostRound}>START NEXT CATEGORY</button><label className="duration-control"><span>ROUND TIME</span><select value={hostRound.duration || 45} onChange={changeRoundDuration} disabled={['countdown', 'running'].includes(hostRound.phase)}><option value={15}>15 SEC</option><option value={30}>30 SEC</option><option value={45}>45 SEC</option><option value={60}>60 SEC</option></select></label></div>
         </section>
         <section className="teams-panel">
@@ -363,7 +364,7 @@ function App() {
     <main className="shell shell--game shell--team">
       <header className="game-header"><div className="brand"><span className="brand-dot">ITC</span><span>HITSTER BINGO</span></div><div className="room-pill">ROOM <strong>{roomCode}</strong></div></header>
       <section className={`round-strip round-strip--${remoteRound.phase} ${remoteRound.phase === 'running' && remoteRound.remaining <= 5 ? 'round-strip--warning' : ''}`}>
-        <div><p className="eyebrow">Host challenge</p><strong>{remoteRound.category.name}</strong></div>
+        <div><p className="eyebrow">{remoteRound.phase === 'countdown' ? 'Get ready' : 'Host challenge'}</p><strong>{remoteRound.category.name}</strong></div>
         <div className="round-strip__timer">{remoteRound.phase === 'done' ? "TIME'S UP" : remoteRound.phase === 'ready' ? 'READY' : remoteRound.phase === 'countdown' && remoteRound.remaining === 0 ? 'GO' : remoteRound.remaining}</div>
       </section>
       <section className="board-header"><div><p className="eyebrow">Team board</p><h1>{teamName}</h1></div>{hasBingo && <div className="bingo-badge bingo-badge--active">BINGO!</div>}</section>
