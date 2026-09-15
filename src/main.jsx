@@ -12,6 +12,7 @@ const CATEGORIES = [
 ];
 const BOARD_SIZE = 25;
 const STORAGE_KEY = 'itcfun-local-state';
+const DISCO_BALL_URL = `${import.meta.env.BASE_URL}discoball.gif`;
 
 function hashSeed(value) {
   let hash = 2166136261;
@@ -230,7 +231,7 @@ function App() {
       <main className="shell shell--landing">
         <header className="brand"><span className="brand-dot">ITC</span><span>ITCFun</span></header>
         <section className="hero">
-          <img className="disco-ball disco-ball--landing" src="/discoball.gif" alt="" aria-hidden="true" />
+          <img className="disco-ball disco-ball--landing" src={DISCO_BALL_URL} alt="" aria-hidden="true" />
           <p className="eyebrow">Digital team bingo</p>
           <h1>Play the room.<br /><em>Own the board.</em></h1>
           <p className="hero-copy">Create a room for your teams or join with a code. Every team gets its own randomized Hitster Bingo board.</p>
@@ -268,7 +269,7 @@ function App() {
       <main className="shell shell--game">
         <header className="game-header"><div className="brand"><span className="brand-dot">ITC</span><span>ITCFun</span></div><div className="room-pill">ROOM <strong>{roomCode}</strong></div></header>
         <section className="host-stage">
-          <img className="disco-ball disco-ball--host" src="/discoball.gif" alt="" aria-hidden="true" />
+          <img className="disco-ball disco-ball--host" src={DISCO_BALL_URL} alt="" aria-hidden="true" />
           <p className="eyebrow">Host control</p>
           <h1>{hostRound.category.name}</h1>
           <div className={`host-timer ${hostRound.phase === 'done' ? 'host-timer--done' : ''}`}>{countdownText}</div>
