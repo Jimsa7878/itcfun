@@ -229,7 +229,7 @@ function App() {
   if (view === 'landing') {
     return (
       <main className="shell shell--landing">
-        <header className="brand"><span className="brand-dot">ITC</span><span>ITC Hitster Bingo</span></header>
+        <header className="brand"><span className="brand-dot">ITC</span><span>HITSTER BINGO</span></header>
         <section className="landing-stage">
           <p className="panel-kicker">The music contest starts here</p>
           <h1>Welcome to<br /><em>ITC Hitster Bingo</em></h1>
@@ -249,7 +249,7 @@ function App() {
   if (view === 'join') {
     return (
       <main className="shell shell--centered">
-        <header className="brand"><span className="brand-dot">ITC</span><span>ITCFun</span></header>
+        <header className="brand"><span className="brand-dot">ITC</span><span>HITSTER BINGO</span></header>
         <form className="join-card" onSubmit={enterTeam}>
           <p className="eyebrow">Join the game</p>
           <h1>Find your team board.</h1>
@@ -267,7 +267,7 @@ function App() {
     const countdownText = hostRound.phase === 'countdown' ? hostRound.remaining : hostRound.phase === 'done' ? "TIME'S UP" : hostRound.remaining;
     return (
       <main className="shell shell--game">
-        <header className="game-header"><div className="brand"><span className="brand-dot">ITC</span><span>ITCFun</span></div><div className="room-pill">ROOM <strong>{roomCode}</strong></div></header>
+        <header className="game-header"><div className="brand"><span className="brand-dot">ITC</span><span>HITSTER BINGO</span></div><div className="room-pill">ROOM <strong>{roomCode}</strong></div></header>
            <section className="host-stage host-stage--disco">
              <p className="panel-kicker">Next challenge</p>
              <div className={`host-category host-category--${hostRound.category.color} ${hostRound.phase === 'done' ? 'host-category--done' : ''}`}>
@@ -293,7 +293,7 @@ function App() {
   const categoryByColor = Object.fromEntries(CATEGORIES.map((categoryItem) => [categoryItem.color, categoryItem]));
   return (
     <main className="shell shell--game">
-      <header className="game-header"><div className="brand"><span className="brand-dot">ITC</span><span>ITCFun</span></div><div className="room-pill">ROOM <strong>{roomCode}</strong></div></header>
+      <header className="game-header"><div className="brand"><span className="brand-dot">ITC</span><span>HITSTER BINGO</span></div><div className="room-pill">ROOM <strong>{roomCode}</strong></div></header>
       <section className={`round-strip round-strip--${remoteRound.phase}`}>
         <div><p className="eyebrow">Host challenge</p><strong>{remoteRound.category.name}</strong></div>
         <div className="round-strip__timer">{remoteRound.phase === 'done' ? "TIME'S UP" : remoteRound.phase === 'ready' ? 'READY' : remoteRound.remaining}</div>
