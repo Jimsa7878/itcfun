@@ -189,6 +189,17 @@ function App() {
     };
   }, [view, hostRoomId]);
 
+  useEffect(() => {
+    if (view !== 'host') return undefined;
+    const handleKeyDown = (event) => {
+      if (event.code !== 'Space' || event.repeat) return;
+      event.preventDefault();
+      if (!['countdown', 'running'].includes(hostRound.phase)) startHostRound();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [view, hostRound.phase]);
+
   const enterTeam = async (event) => {
     event.preventDefault();
     const cleanRoom = roomCode.trim().toUpperCase();
@@ -251,7 +262,7 @@ function App() {
   };
 
   const newHostRound = async () => {
-    const nextRound = { category: CATEGORIES[Math.floor(Math.random() * CATEGORIES.length)], phase: 'ready', remaining: 45 };
+    const nextRound = { category: CATEGORIES[Math.floor(Math.random() * CATEGORIES.length)], phase: 'countdown', remaining: 3 };
     setHostRound(nextRound);
     await saveRound(nextRound);
   };
@@ -327,7 +338,7 @@ function App() {
               <div className={`host-timer ${hostRound.phase === 'done' ? 'host-timer--done' : ''} ${hostRound.phase === 'countdown' && hostRound.remaining === 0 ? 'host-timer--go' : ''} ${hostRound.phase === 'running' && hostRound.remaining <= 5 ? 'host-timer--warning' : ''}`}>{countdownText}</div>
              </div>
           <p>{hostRound.phase === 'ready' ? 'Category ready. Start when every team is set.' : hostRound.phase === 'running' ? '45 seconds on the clock.' : hostRound.phase === 'countdown' ? 'Get ready...' : "Time's up. Reveal the answer out loud."}</p>
-          <div className="host-actions"><button className="button button--primary" onClick={startHostRound} disabled={hostRound.phase === 'countdown' || hostRound.phase === 'running'}>{hostRound.phase === 'done' ? 'START AGAIN' : 'START ROUND'}</button><button className="button button--secondary" onClick={newHostRound}>NEW CATEGORY</button></div>
+          <div className="host-actions"><button className="button button--primary" onClick={newHostRound}>NEW CATEGORY</button></div>
         </section>
         <section className="teams-panel">
           <div className="teams-panel__header"><div><p className="eyebrow">Live room</p><h2>Teams in the room</h2></div><strong>{teams.length}/15</strong></div>
