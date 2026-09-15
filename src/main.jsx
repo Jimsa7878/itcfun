@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import './styles.css';
-import { supabase } from './lib/supabase';
+import { ensureAnonymousSession, supabase } from './lib/supabase';
 
 const CATEGORIES = [
   { name: 'SONG TITLE', color: 'green', icon: '♫', rule: 'Name the song.' },
@@ -63,6 +63,7 @@ function App() {
   const [board, setBoard] = useState([]);
   const [marked, setMarked] = useState([]);
   const [message, setMessage] = useState('');
+  const [authUserId, setAuthUserId] = useState(null);
   const [hostRound, setHostRound] = useState({ category: CATEGORIES[0], phase: 'ready', remaining: 45 });
   const [remoteRound, setRemoteRound] = useState({ category: CATEGORIES[0], phase: 'ready', remaining: 45 });
 
@@ -80,6 +81,20 @@ function App() {
   const completedLines = useMemo(() => bingoLines.filter((line) => line.every((index) => marked.includes(index))), [bingoLines, marked]);
   const hasBingo = completedLines.length > 0;
   const teamsWithBingo = teams.filter((team) => bingoLines.some((line) => line.every((index) => (team.marked_cells || []).includes(index))));
+
+  useEffect(() => {
+    let active = true;
+    ensureAnonymousSession()
+      .then((session) => {
+        if (active) setAuthUserId(session.user.id);
+      })
+      .catch(() => {
+        if (active) setMessage('Could not connect securely. Please reload and try again.');
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   useEffect(() => {
     const saved = getStoredState();
@@ -181,6 +196,10 @@ function App() {
       setMessage('Enter the four-digit room code and your team name first.');
       return;
     }
+    if (!authUserId) {
+      setMessage('Still connecting securely. Please try again in a moment.');
+      return;
+    }
     setMessage('Connecting to room...');
     const { data: room, error: roomError } = await supabase.from('rooms').select('id, code, category, phase, remaining').eq('code', cleanRoom).maybeSingle();
     if (roomError || !room) {
@@ -188,7 +207,7 @@ function App() {
       return;
     }
     const nextBoard = createBoard(cleanRoom, cleanTeam);
-    const { data: team, error: teamError } = await supabase.from('teams').upsert({ room_id: room.id, name: cleanTeam, board_colors: nextBoard.map((cell) => cell.color) }, { onConflict: 'room_id,name' }).select('id, marked_cells').single();
+    const { data: team, error: teamError } = await supabase.from('teams').upsert({ room_id: room.id, name: cleanTeam, user_id: authUserId, board_colors: nextBoard.map((cell) => cell.color) }, { onConflict: 'room_id,name' }).select('id, marked_cells').single();
     if (teamError) {
       setMessage(teamError.message);
       return;
@@ -204,10 +223,14 @@ function App() {
   };
 
   const createHostRoom = async () => {
+    if (!authUserId) {
+      setMessage('Still connecting securely. Please try again in a moment.');
+      return;
+    }
     const nextRoomCode = createRoomCode();
     const nextRound = { category: CATEGORIES[Math.floor(Math.random() * CATEGORIES.length)], phase: 'ready', remaining: 45 };
     setMessage('Creating room...');
-    const { data: room, error } = await supabase.from('rooms').insert({ code: nextRoomCode, category: nextRound.category.name, phase: nextRound.phase, remaining: nextRound.remaining }).select('id').single();
+    const { data: room, error } = await supabase.from('rooms').insert({ code: nextRoomCode, host_user_id: authUserId, category: nextRound.category.name, phase: nextRound.phase, remaining: nextRound.remaining }).select('id').single();
     if (error) {
       setMessage(error.message);
       return;
@@ -235,12 +258,12 @@ function App() {
   const toggleCell = async (cellId) => {
     const nextMarked = marked.includes(cellId) ? marked.filter((id) => id !== cellId) : [...marked, cellId];
     setMarked(nextMarked);
-    if (teamId) await supabase.from('teams').update({ marked_cells: nextMarked }).eq('id', teamId);
+    if (teamId && authUserId) await supabase.from('teams').update({ marked_cells: nextMarked }).eq('id', teamId).eq('user_id', authUserId);
   };
 
   const resetBoard = async () => {
     setMarked([]);
-    if (teamId) await supabase.from('teams').update({ marked_cells: [] }).eq('id', teamId);
+    if (teamId && authUserId) await supabase.from('teams').update({ marked_cells: [] }).eq('id', teamId).eq('user_id', authUserId);
   };
   const leaveTeam = () => {
     window.localStorage.removeItem(STORAGE_KEY);

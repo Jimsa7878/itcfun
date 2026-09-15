@@ -17,6 +17,7 @@ VITE_SUPABASE_PUBLISHABLE_KEY=your-publishable-key
 ```
 
 Run [`supabase/schema.sql`](supabase/schema.sql) in the Supabase SQL Editor before creating rooms.
+Enable anonymous sign-ins under **Authentication > Providers > Anonymous**. Players still only enter a room code and team name; the app uses the anonymous session silently to protect room and team updates with RLS.
 
 ## Build
 

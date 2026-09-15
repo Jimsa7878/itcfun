@@ -4,6 +4,7 @@ create table if not exists public.rooms (
   id uuid primary key default gen_random_uuid(),
   code text unique not null check (code ~ '^[0-9]{4}$'),
   host_token uuid not null default gen_random_uuid(),
+  host_user_id uuid,
   category text not null default 'SONG TITLE',
   phase text not null default 'ready' check (phase in ('ready', 'countdown', 'running', 'done')),
   remaining integer not null default 45 check (remaining between 0 and 90),
@@ -28,10 +29,12 @@ begin
 end $$;
 
 alter table public.rooms add constraint rooms_code_check check (code ~ '^[0-9]{4}$');
+alter table public.rooms add column if not exists host_user_id uuid;
 
 create table if not exists public.teams (
   id uuid primary key default gen_random_uuid(),
   room_id uuid not null references public.rooms(id) on delete cascade,
+  user_id uuid,
   name text not null check (char_length(name) between 1 and 24),
   board_colors jsonb not null,
   marked_cells integer[] not null default '{}',
@@ -40,6 +43,8 @@ create table if not exists public.teams (
 );
 
 create index if not exists teams_room_id_idx on public.teams(room_id);
+
+alter table public.teams add column if not exists user_id uuid;
 
 alter table public.rooms enable row level security;
 alter table public.teams enable row level security;
@@ -50,6 +55,12 @@ drop policy if exists "Hosts can update room state" on public.rooms;
 drop policy if exists "Anyone can join a room" on public.teams;
 drop policy if exists "Anyone can read teams in a room" on public.teams;
 drop policy if exists "Teams can update their board marks" on public.teams;
+drop policy if exists "Hosts can read teams in their rooms" on public.teams;
+drop policy if exists "Teams can read their own row" on public.teams;
+drop policy if exists "Authenticated users can create rooms" on public.rooms;
+drop policy if exists "Hosts can update their own room" on public.rooms;
+drop policy if exists "Authenticated users can join rooms" on public.teams;
+drop policy if exists "Teams can update their own board marks" on public.teams;
 
 create policy "Anyone can read rooms by code"
   on public.rooms for select
@@ -57,25 +68,25 @@ create policy "Anyone can read rooms by code"
 
 create policy "Anyone can create rooms"
   on public.rooms for insert
-  with check (true);
+  with check (host_user_id = auth.uid());
 
 create policy "Hosts can update room state"
   on public.rooms for update
-  using (true)
-  with check (true);
+  using (host_user_id = auth.uid())
+  with check (host_user_id = auth.uid());
 
 create policy "Anyone can join a room"
   on public.teams for insert
-  with check (true);
+  with check (user_id = auth.uid() and exists (select 1 from public.rooms where rooms.id = room_id));
 
 create policy "Anyone can read teams in a room"
   on public.teams for select
-  using (true);
+  using (user_id = auth.uid() or exists (select 1 from public.rooms where rooms.id = room_id and rooms.host_user_id = auth.uid()));
 
 create policy "Teams can update their board marks"
   on public.teams for update
-  using (true)
-  with check (true);
+  using (user_id = auth.uid())
+  with check (user_id = auth.uid());
 
 alter table public.rooms replica identity full;
 alter table public.teams replica identity full;

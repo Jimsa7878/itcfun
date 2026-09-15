@@ -8,3 +8,13 @@ if (!supabaseUrl || !supabasePublishableKey) {
 }
 
 export const supabase = createClient(supabaseUrl, supabasePublishableKey);
+
+export async function ensureAnonymousSession() {
+  const { data: existing, error: sessionError } = await supabase.auth.getSession();
+  if (sessionError) throw sessionError;
+  if (existing.session) return existing.session;
+
+  const { data, error } = await supabase.auth.signInAnonymously();
+  if (error) throw error;
+  return data.session;
+}
