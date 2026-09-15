@@ -199,7 +199,7 @@ function App() {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [view, hostRound.phase]);
+  }, [view, hostRound.phase, hostRound.duration]);
 
   const enterTeam = async (event) => {
     event.preventDefault();
