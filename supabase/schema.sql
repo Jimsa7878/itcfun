@@ -12,6 +12,21 @@ create table if not exists public.rooms (
 
 -- Keep an existing Supabase project aligned with the four-digit room codes.
 alter table public.rooms drop constraint if exists rooms_code_check;
+
+do $$
+declare
+  room_record record;
+  next_code text;
+begin
+  for room_record in select id from public.rooms where code !~ '^[0-9]{4}$' loop
+    loop
+      next_code := floor(1000 + random() * 9000)::int::text;
+      exit when not exists (select 1 from public.rooms where code = next_code);
+    end loop;
+    update public.rooms set code = next_code where id = room_record.id;
+  end loop;
+end $$;
+
 alter table public.rooms add constraint rooms_code_check check (code ~ '^[0-9]{4}$');
 
 create table if not exists public.teams (
