@@ -44,8 +44,8 @@ h1 { margin: 0; font-family: 'Barlow Condensed', sans-serif; font-size: clamp(40
 .join-card .button { width: 100%; margin-top: 14px; }
 .form-message { color: var(--orange); font-size: 12px; }
 .game-header, .board-header { display: flex; justify-content: space-between; align-items: center; gap: 18px; }
-.room-pill { padding: 10px 14px; color: var(--muted); border: 1px solid var(--line); border-radius: 999px; font-size: 11px; letter-spacing: .1em; }
-.room-pill strong { color: var(--yellow); }
+.room-pill { padding: 9px 15px; color: var(--muted); border: 1px solid var(--line); border-radius: 9px; font-size: 11px; letter-spacing: .1em; }
+.room-pill strong { display: inline-block; margin-left: 5px; color: var(--yellow); font-family: 'Barlow Condensed', sans-serif; font-size: 29px; letter-spacing: .08em; line-height: .75; vertical-align: -4px; }
 .host-stage { width: min(900px, 100%); margin: clamp(24px, 7vh, 76px) auto clamp(20px, 5vh, 56px); padding: clamp(32px, 7vw, 72px) clamp(18px, 6vw, 70px); text-align: center; border: 1px solid rgba(255,255,255,.2); border-radius: 18px; background: linear-gradient(145deg, rgba(6,7,14,.97), rgba(18,15,29,.98)); box-shadow: 0 25px 90px rgba(0,0,0,.58), inset 0 1px rgba(255,255,255,.12), 0 0 50px rgba(255,79,163,.08); }
 .panel-kicker { color: var(--blue); font-size: 12px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; }
 .host-category { min-height: clamp(78px, 13vw, 140px); margin: 18px 0 2px; display: flex; align-items: center; justify-content: center; gap: clamp(10px, 2vw, 22px); color: var(--ink); font-family: 'Barlow Condensed', sans-serif; font-size: clamp(52px, 10vw, 118px); font-weight: 800; line-height: .88; letter-spacing: .01em; text-transform: uppercase; text-wrap: balance; text-shadow: 0 3px 0 var(--category-color), 0 5px 0 rgba(255,255,255,.04); }

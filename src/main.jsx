@@ -42,7 +42,7 @@ function createBoard(roomCode, teamName) {
 }
 
 function createRoomCode() {
-  return Math.random().toString(36).slice(2, 8).toUpperCase();
+  return String(Math.floor(1000 + Math.random() * 9000));
 }
 
 function getStoredState() {
@@ -153,8 +153,8 @@ function App() {
     event.preventDefault();
     const cleanRoom = roomCode.trim().toUpperCase();
     const cleanTeam = teamName.trim();
-    if (!cleanRoom || !cleanTeam) {
-      setMessage('Enter a room code and team name first.');
+    if (!/^\d{4}$/.test(cleanRoom) || !cleanTeam) {
+      setMessage('Enter the four-digit room code and your team name first.');
       return;
     }
     setMessage('Connecting to room...');
@@ -254,7 +254,7 @@ function App() {
         <form className="join-card" onSubmit={enterTeam}>
           <p className="eyebrow">Join the game</p>
           <h1>Find your team board.</h1>
-          <label>Room code<input value={roomCode} onChange={(event) => setRoomCode(event.target.value)} placeholder="ABC123" maxLength="6" /></label>
+          <label>Room code<input inputMode="numeric" pattern="[0-9]{4}" value={roomCode} onChange={(event) => setRoomCode(event.target.value.replace(/\D/g, '').slice(0, 4))} placeholder="1234" maxLength="4" /></label>
           <label>Team name<input value={teamName} onChange={(event) => setTeamName(event.target.value)} placeholder="The Vinyl Squad" maxLength="24" /></label>
           {message && <p className="form-message">{message}</p>}
           <button className="button button--primary" type="submit">OPEN MY BOARD</button>
