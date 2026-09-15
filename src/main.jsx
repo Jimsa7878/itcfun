@@ -268,11 +268,16 @@ function App() {
     return (
       <main className="shell shell--game">
         <header className="game-header"><div className="brand"><span className="brand-dot">ITC</span><span>ITCFun</span></div><div className="room-pill">ROOM <strong>{roomCode}</strong></div></header>
-        <section className="host-stage">
-          <img className="disco-ball disco-ball--host" src={DISCO_BALL_URL} alt="" aria-hidden="true" />
-          <p className="eyebrow">Host control</p>
-          <h1>{hostRound.category.name}</h1>
-          <div className={`host-timer ${hostRound.phase === 'done' ? 'host-timer--done' : ''}`}>{countdownText}</div>
+           <section className="host-stage host-stage--disco">
+             <p className="panel-kicker">Next challenge</p>
+             <div className={`host-category host-category--${hostRound.category.color} ${hostRound.phase === 'done' ? 'host-category--done' : ''}`}>
+               {hostRound.phase !== 'done' && <span className="host-category__icon" aria-hidden="true">{hostRound.category.icon}</span>}
+               <span>{hostRound.phase === 'done' ? "TIME'S UP!" : hostRound.category.name}</span>
+             </div>
+             <div className={`host-disco-ball ${hostRound.phase === 'done' ? 'host-disco-ball--done' : ''}`}>
+               <img className="host-disco-ball__image" src={DISCO_BALL_URL} alt="" aria-hidden="true" />
+               <div className={`host-timer ${hostRound.phase === 'done' ? 'host-timer--done' : ''}`}>{countdownText}</div>
+             </div>
           <p>{hostRound.phase === 'ready' ? 'Category ready. Start when every team is set.' : hostRound.phase === 'running' ? '45 seconds on the clock.' : hostRound.phase === 'countdown' ? 'Get ready...' : "Time's up. Reveal the answer out loud."}</p>
           <div className="host-actions"><button className="button button--primary" onClick={startHostRound} disabled={hostRound.phase === 'countdown' || hostRound.phase === 'running'}>{hostRound.phase === 'done' ? 'START AGAIN' : 'START ROUND'}</button><button className="button button--secondary" onClick={newHostRound}>NEW CATEGORY</button></div>
         </section>
