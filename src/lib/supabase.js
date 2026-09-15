@@ -16,5 +16,6 @@ export async function ensureAnonymousSession() {
 
   const { data, error } = await supabase.auth.signInAnonymously();
   if (error) throw error;
+  if (!data.session) throw new Error('Anonymous sign-in returned no session. Check that Anonymous Sign-Ins are enabled in Supabase.');
   return data.session;
 }

@@ -88,8 +88,9 @@ function App() {
       .then((session) => {
         if (active) setAuthUserId(session.user.id);
       })
-      .catch(() => {
-        if (active) setMessage('Could not connect securely. Please reload and try again.');
+      .catch((error) => {
+        console.error('Anonymous Supabase sign-in failed:', error);
+        if (active) setMessage(`Secure connection failed: ${error.message}`);
       });
     return () => {
       active = false;
