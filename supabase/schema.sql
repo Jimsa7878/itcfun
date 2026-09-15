@@ -2,13 +2,17 @@ create extension if not exists pgcrypto;
 
 create table if not exists public.rooms (
   id uuid primary key default gen_random_uuid(),
-  code text unique not null check (code ~ '^[A-Z0-9]{6}$'),
+  code text unique not null check (code ~ '^[0-9]{4}$'),
   host_token uuid not null default gen_random_uuid(),
   category text not null default 'SONG TITLE',
   phase text not null default 'ready' check (phase in ('ready', 'countdown', 'running', 'done')),
   remaining integer not null default 45 check (remaining between 0 and 90),
   created_at timestamptz not null default now()
 );
+
+-- Keep an existing Supabase project aligned with the four-digit room codes.
+alter table public.rooms drop constraint if exists rooms_code_check;
+alter table public.rooms add constraint rooms_code_check check (code ~ '^[0-9]{4}$');
 
 create table if not exists public.teams (
   id uuid primary key default gen_random_uuid(),
