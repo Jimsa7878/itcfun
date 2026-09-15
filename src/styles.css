@@ -29,6 +29,7 @@ h1 { margin: 0; font-family: 'Barlow Condensed', sans-serif; font-size: clamp(40
 .landing-disco-ball::after { content: ''; position: absolute; z-index: 1; inset: 5%; border-radius: 50%; border: 1px solid rgba(255,255,255,.55); box-shadow: inset 0 0 20px rgba(255,255,255,.3); pointer-events: none; }
 .landing-actions, .host-actions, .board-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
 .landing-actions { justify-content: center; margin-top: 26px; }
+.host-actions { justify-content: center; }
 .button { min-height: 48px; padding: 0 20px; border: 1px solid transparent; border-radius: 6px; color: var(--ink); font-size: 12px; font-weight: 700; letter-spacing: .1em; cursor: pointer; transition: transform .18s, opacity .18s, background .18s; }
 .button:hover:not(:disabled) { transform: translateY(-2px); }
 .button:disabled { cursor: not-allowed; opacity: .42; }
