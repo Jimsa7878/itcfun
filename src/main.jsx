@@ -10,6 +10,7 @@ const CATEGORIES = [
   { name: 'DECADE', color: 'purple', icon: '◉', rule: 'Name the release decade.' },
   { name: 'YEAR +/- 3', color: 'blue', icon: '±', rule: 'Within 3 years is correct.' }
 ];
+const ROUND_DURATIONS = [15, 30, 45, 60];
 const BOARD_SIZE = 25;
 const STORAGE_KEY = 'itcfun-local-state';
 const DISCO_BALL_URL = `${import.meta.env.BASE_URL}discoball.gif`;
@@ -64,8 +65,8 @@ function App() {
   const [marked, setMarked] = useState([]);
   const [message, setMessage] = useState('');
   const [authUserId, setAuthUserId] = useState(null);
-  const [hostRound, setHostRound] = useState({ category: CATEGORIES[0], phase: 'ready', remaining: 45 });
-  const [remoteRound, setRemoteRound] = useState({ category: CATEGORIES[0], phase: 'ready', remaining: 45 });
+  const [hostRound, setHostRound] = useState({ category: CATEGORIES[0], phase: 'ready', remaining: 45, duration: 45 });
+  const [remoteRound, setRemoteRound] = useState({ category: CATEGORIES[0], phase: 'ready', remaining: 45, duration: 45 });
 
   const bingoLines = useMemo(() => {
     const lines = [];
@@ -116,14 +117,14 @@ function App() {
 
   const saveRound = async (nextRound) => {
     if (!hostRoomId) return;
-    await supabase.from('rooms').update({ category: nextRound.category.name, phase: nextRound.phase, remaining: nextRound.remaining }).eq('id', hostRoomId);
+    await supabase.from('rooms').update({ category: nextRound.category.name, phase: nextRound.phase, remaining: nextRound.remaining, duration: nextRound.duration }).eq('id', hostRoomId);
   };
 
   useEffect(() => {
     if (view !== 'host' || !hostRoomId || !['countdown', 'running'].includes(hostRound.phase)) return undefined;
     if (hostRound.phase === 'countdown' && hostRound.remaining === 0) {
       const goTimer = window.setTimeout(() => {
-        const nextRound = { ...hostRound, phase: 'running', remaining: 45 };
+        const nextRound = { ...hostRound, phase: 'running', remaining: hostRound.duration };
         setHostRound(nextRound);
         saveRound(nextRound);
       }, 700);
@@ -147,13 +148,13 @@ function App() {
     if (view !== 'team' || !roomCode) return undefined;
     let active = true;
     const loadRound = async () => {
-      const { data } = await supabase.from('rooms').select('id, category, phase, remaining').eq('code', roomCode).maybeSingle();
-      if (active && data) setRemoteRound({ category: CATEGORIES.find((item) => item.name === data.category) || CATEGORIES[0], phase: data.phase, remaining: data.remaining });
+      const { data } = await supabase.from('rooms').select('id, category, phase, remaining, duration').eq('code', roomCode).maybeSingle();
+      if (active && data) setRemoteRound({ category: CATEGORIES.find((item) => item.name === data.category) || CATEGORIES[0], phase: data.phase, remaining: data.remaining, duration: data.duration || 45 });
     };
     loadRound();
     const channel = supabase.channel(`team-round-${roomCode}`).on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'rooms', filter: `code=eq.${roomCode}` }, (payload) => {
       const next = payload.new;
-      setRemoteRound({ category: CATEGORIES.find((item) => item.name === next.category) || CATEGORIES[0], phase: next.phase, remaining: next.remaining });
+      setRemoteRound({ category: CATEGORIES.find((item) => item.name === next.category) || CATEGORIES[0], phase: next.phase, remaining: next.remaining, duration: next.duration || 45 });
     }).subscribe();
     return () => {
       active = false;
@@ -213,7 +214,7 @@ function App() {
       return;
     }
     setMessage('Connecting to room...');
-    const { data: room, error: roomError } = await supabase.from('rooms').select('id, code, category, phase, remaining').eq('code', cleanRoom).maybeSingle();
+    const { data: room, error: roomError } = await supabase.from('rooms').select('id, code, category, phase, remaining, duration').eq('code', cleanRoom).maybeSingle();
     if (roomError || !room) {
       setMessage(roomError?.message || 'Room not found. Check the code and try again.');
       return;
@@ -229,7 +230,7 @@ function App() {
     setTeamId(team.id);
     setBoard(nextBoard);
     setMarked(team.marked_cells || []);
-    setRemoteRound({ category: CATEGORIES.find((item) => item.name === room.category) || CATEGORIES[0], phase: room.phase, remaining: room.remaining });
+    setRemoteRound({ category: CATEGORIES.find((item) => item.name === room.category) || CATEGORIES[0], phase: room.phase, remaining: room.remaining, duration: room.duration || 45 });
     setMessage('');
     setView('team');
   };
@@ -240,9 +241,9 @@ function App() {
       return;
     }
     const nextRoomCode = createRoomCode();
-    const nextRound = { category: CATEGORIES[Math.floor(Math.random() * CATEGORIES.length)], phase: 'ready', remaining: 45 };
+    const nextRound = { category: CATEGORIES[Math.floor(Math.random() * CATEGORIES.length)], phase: 'ready', remaining: 45, duration: 45 };
     setMessage('Creating room...');
-    const { data: room, error } = await supabase.from('rooms').insert({ code: nextRoomCode, host_user_id: authUserId, category: nextRound.category.name, phase: nextRound.phase, remaining: nextRound.remaining }).select('id').single();
+    const { data: room, error } = await supabase.from('rooms').insert({ code: nextRoomCode, host_user_id: authUserId, category: nextRound.category.name, phase: nextRound.phase, remaining: nextRound.remaining, duration: nextRound.duration }).select('id').single();
     if (error) {
       setMessage(error.message);
       return;
@@ -262,9 +263,17 @@ function App() {
   };
 
   const newHostRound = async () => {
-    const nextRound = { category: CATEGORIES[Math.floor(Math.random() * CATEGORIES.length)], phase: 'countdown', remaining: 3 };
+    const nextRound = { category: CATEGORIES[Math.floor(Math.random() * CATEGORIES.length)], phase: 'countdown', remaining: 3, duration: hostRound.duration || 45 };
     setHostRound(nextRound);
     await saveRound(nextRound);
+  };
+
+  const changeRoundDuration = (event) => {
+    const duration = Number(event.target.value);
+    if (!ROUND_DURATIONS.includes(duration) || ['countdown', 'running'].includes(hostRound.phase)) return;
+    const nextRound = { ...hostRound, duration, remaining: duration };
+    setHostRound(nextRound);
+    saveRound(nextRound);
   };
 
   const toggleCell = async (cellId) => {
@@ -337,8 +346,8 @@ function App() {
                <img className="host-disco-ball__image" src={DISCO_BALL_URL} alt="" aria-hidden="true" />
               <div className={`host-timer ${hostRound.phase === 'done' ? 'host-timer--done' : ''} ${hostRound.phase === 'countdown' && hostRound.remaining === 0 ? 'host-timer--go' : ''} ${hostRound.phase === 'running' && hostRound.remaining <= 5 ? 'host-timer--warning' : ''}`}>{countdownText}</div>
              </div>
-          <p>{hostRound.phase === 'ready' ? 'Category ready. Start when every team is set.' : hostRound.phase === 'running' ? '45 seconds on the clock.' : hostRound.phase === 'countdown' ? 'Get ready...' : "Time's up. Reveal the answer out loud."}</p>
-          <div className="host-actions"><button className="button button--primary" onClick={newHostRound}>START NEXT CATEGORY</button></div>
+          <p>{hostRound.phase === 'ready' ? 'Category ready. Start when every team is set.' : hostRound.phase === 'running' ? `${hostRound.duration} seconds on the clock.` : hostRound.phase === 'countdown' ? 'Get ready...' : "Time's up. Reveal the answer out loud."}</p>
+          <div className="host-actions"><button className="button button--primary" onClick={newHostRound}>START NEXT CATEGORY</button><label className="duration-control"><span>ROUND TIME</span><select value={hostRound.duration || 45} onChange={changeRoundDuration} disabled={['countdown', 'running'].includes(hostRound.phase)}><option value={15}>15 SEC</option><option value={30}>30 SEC</option><option value={45}>45 SEC</option><option value={60}>60 SEC</option></select></label></div>
         </section>
         <section className="teams-panel">
           <div className="teams-panel__header"><div><p className="eyebrow">Live room</p><h2>Teams in the room</h2></div><strong>{teams.length}/15</strong></div>

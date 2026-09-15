@@ -8,6 +8,7 @@ create table if not exists public.rooms (
   category text not null default 'SONG TITLE',
   phase text not null default 'ready' check (phase in ('ready', 'countdown', 'running', 'done')),
   remaining integer not null default 45 check (remaining between 0 and 90),
+  duration integer not null default 45 check (duration in (15, 30, 45, 60)),
   created_at timestamptz not null default now()
 );
 
@@ -30,6 +31,9 @@ end $$;
 
 alter table public.rooms add constraint rooms_code_check check (code ~ '^[0-9]{4}$');
 alter table public.rooms add column if not exists host_user_id uuid;
+alter table public.rooms add column if not exists duration integer not null default 45;
+alter table public.rooms drop constraint if exists rooms_duration_check;
+alter table public.rooms add constraint rooms_duration_check check (duration in (15, 30, 45, 60));
 
 create table if not exists public.teams (
   id uuid primary key default gen_random_uuid(),
