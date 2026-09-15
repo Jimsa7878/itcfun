@@ -67,6 +67,8 @@ h1 { margin: 0; font-family: 'Barlow Condensed', sans-serif; font-size: clamp(40
 .host-stage > p:not(.eyebrow) { color: var(--muted); }
 .host-timer { position: relative; z-index: 2; margin: 0; color: #fff8e8; font-family: 'Barlow Condensed', sans-serif; font-size: clamp(100px, 19vw, 190px); font-weight: 800; line-height: .76; font-variant-numeric: tabular-nums; text-shadow: 0 4px 0 rgba(39,29,63,.75), 0 0 22px rgba(255,226,102,.8); }
 .host-timer--done { color: #fff8e8; animation: pulse .65s ease-in-out infinite alternate; }
+.host-timer--go { color: #f0c9ff; animation: pulse .35s ease-in-out infinite alternate; }
+.host-timer--warning { color: #ff596f; animation: flash .45s infinite alternate; text-shadow: 0 4px 0 rgba(72,8,28,.75), 0 0 28px rgba(255,45,82,.9); }
 .teams-panel { width: min(760px, 100%); margin: 0 auto; padding: 22px; border: 1px solid var(--line); border-radius: 12px; background: rgba(8,7,12,.76); }
 .teams-panel__header { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
 .teams-panel__header h2 { margin: 0; font-family: 'Barlow Condensed', sans-serif; font-size: clamp(26px, 4vw, 38px); line-height: .9; text-transform: uppercase; }
@@ -84,6 +86,7 @@ h1 { margin: 0; font-family: 'Barlow Condensed', sans-serif; font-size: clamp(40
 .round-strip__timer { color: var(--orange); font-family: 'Barlow Condensed', sans-serif; font-size: clamp(36px, 6vw, 60px); font-weight: 800; line-height: .8; font-variant-numeric: tabular-nums; }
 .round-strip--done .round-strip__timer { color: var(--yellow); animation: flash .5s infinite alternate; font-size: clamp(24px, 4vw, 42px); }
 .round-strip--countdown .round-strip__timer { color: var(--yellow); }
+.round-strip--warning .round-strip__timer { color: #ff596f; animation: flash .45s infinite alternate; text-shadow: 0 0 18px rgba(255,45,82,.75); }
 .board-header h1 { font-size: clamp(45px, 8vw, 88px); }
 .bingo-badge { padding: 12px 15px; color: var(--muted); border: 1px solid var(--line); border-radius: 6px; font-size: 12px; font-weight: 700; letter-spacing: .1em; }
 .bingo-badge--active { color: #181119; border-color: var(--yellow); background: var(--yellow); animation: flash .7s infinite alternate; }

@@ -105,17 +105,27 @@ function App() {
 
   useEffect(() => {
     if (view !== 'host' || !hostRoomId || !['countdown', 'running'].includes(hostRound.phase)) return undefined;
+    if (hostRound.phase === 'countdown' && hostRound.remaining === 0) {
+      const goTimer = window.setTimeout(() => {
+        const nextRound = { ...hostRound, phase: 'running', remaining: 45 };
+        setHostRound(nextRound);
+        saveRound(nextRound);
+      }, 700);
+      return () => window.clearTimeout(goTimer);
+    }
     const timer = window.setInterval(() => {
       setHostRound((current) => {
         const nextRound = current.remaining <= 1
-          ? { ...current, phase: current.phase === 'countdown' ? 'running' : 'done', remaining: current.phase === 'countdown' ? 45 : 0 }
+          ? current.phase === 'countdown'
+            ? { ...current, remaining: 0 }
+            : { ...current, phase: 'done', remaining: 0 }
           : { ...current, remaining: current.remaining - 1 };
         saveRound(nextRound);
         return nextRound;
       });
     }, 1000);
     return () => window.clearInterval(timer);
-  }, [view, hostRoomId, hostRound.phase]);
+  }, [view, hostRoomId, hostRound.phase, hostRound.remaining]);
 
   useEffect(() => {
     if (view !== 'team' || !roomCode) return undefined;
@@ -278,7 +288,7 @@ function App() {
   }
 
   if (view === 'host') {
-    const countdownText = hostRound.phase === 'countdown' ? hostRound.remaining : hostRound.phase === 'done' ? "TIME'S UP" : hostRound.remaining;
+    const countdownText = hostRound.phase === 'countdown' && hostRound.remaining === 0 ? 'GO' : hostRound.phase === 'done' ? "TIME'S UP" : hostRound.remaining;
     return (
       <main className="shell shell--game">
         <header className="game-header"><div className="brand"><span className="brand-dot">ITC</span><span>HITSTER BINGO</span></div><div className="room-pill">ROOM <strong>{roomCode}</strong></div></header>
@@ -290,7 +300,7 @@ function App() {
              </div>
              <div className={`host-disco-ball ${hostRound.phase === 'done' ? 'host-disco-ball--done' : ''}`}>
                <img className="host-disco-ball__image" src={DISCO_BALL_URL} alt="" aria-hidden="true" />
-               <div className={`host-timer ${hostRound.phase === 'done' ? 'host-timer--done' : ''}`}>{countdownText}</div>
+              <div className={`host-timer ${hostRound.phase === 'done' ? 'host-timer--done' : ''} ${hostRound.phase === 'countdown' && hostRound.remaining === 0 ? 'host-timer--go' : ''} ${hostRound.phase === 'running' && hostRound.remaining <= 5 ? 'host-timer--warning' : ''}`}>{countdownText}</div>
              </div>
           <p>{hostRound.phase === 'ready' ? 'Category ready. Start when every team is set.' : hostRound.phase === 'running' ? '45 seconds on the clock.' : hostRound.phase === 'countdown' ? 'Get ready...' : "Time's up. Reveal the answer out loud."}</p>
           <div className="host-actions"><button className="button button--primary" onClick={startHostRound} disabled={hostRound.phase === 'countdown' || hostRound.phase === 'running'}>{hostRound.phase === 'done' ? 'START AGAIN' : 'START ROUND'}</button><button className="button button--secondary" onClick={newHostRound}>NEW CATEGORY</button></div>
@@ -309,9 +319,9 @@ function App() {
   return (
     <main className="shell shell--game">
       <header className="game-header"><div className="brand"><span className="brand-dot">ITC</span><span>HITSTER BINGO</span></div><div className="room-pill">ROOM <strong>{roomCode}</strong></div></header>
-      <section className={`round-strip round-strip--${remoteRound.phase}`}>
+      <section className={`round-strip round-strip--${remoteRound.phase} ${remoteRound.phase === 'running' && remoteRound.remaining <= 5 ? 'round-strip--warning' : ''}`}>
         <div><p className="eyebrow">Host challenge</p><strong>{remoteRound.category.name}</strong></div>
-        <div className="round-strip__timer">{remoteRound.phase === 'done' ? "TIME'S UP" : remoteRound.phase === 'ready' ? 'READY' : remoteRound.remaining}</div>
+        <div className="round-strip__timer">{remoteRound.phase === 'done' ? "TIME'S UP" : remoteRound.phase === 'ready' ? 'READY' : remoteRound.phase === 'countdown' && remoteRound.remaining === 0 ? 'GO' : remoteRound.remaining}</div>
       </section>
       <section className="board-header"><div><p className="eyebrow">Team board</p><h1>{teamName}</h1></div><div className={`bingo-badge ${hasBingo ? 'bingo-badge--active' : ''}`}>{hasBingo ? 'BINGO!' : `${completedLines.length} LINES`}</div></section>
       <section className="legend">{CATEGORIES.map((categoryItem) => <span key={categoryItem.name}><i className={`swatch swatch--${categoryItem.color}`} />{categoryItem.name}</span>)}</section>
