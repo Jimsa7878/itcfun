@@ -236,7 +236,6 @@ function App() {
           <div className="landing-disco-ball">
             <img src={DISCO_BALL_URL} alt="" aria-hidden="true" />
           </div>
-          <p className="landing-copy">Join the room to be part of the contest.</p>
           <div className="landing-actions">
             <button className="button button--primary" onClick={createHostRoom}>CREATE HOST ROOM</button>
             <button className="button button--secondary" onClick={() => setView('join')}>JOIN THE ROOM</button>
