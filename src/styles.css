@@ -71,6 +71,7 @@ h1 { margin: 0; font-family: 'Barlow Condensed', sans-serif; font-size: clamp(40
 .teams-panel__header { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
 .teams-panel__header h2 { margin: 0; font-family: 'Barlow Condensed', sans-serif; font-size: clamp(26px, 4vw, 38px); line-height: .9; text-transform: uppercase; }
 .teams-panel__header > strong { color: var(--yellow); font-family: 'Barlow Condensed', sans-serif; font-size: 32px; }
+.host-bingo-alert { margin-top: 18px; padding: 13px 16px; color: #fff8ff; border: 1px solid rgba(215,67,162,.7); border-radius: 8px; background: linear-gradient(135deg, rgba(155,120,207,.5), rgba(215,67,162,.45)); box-shadow: 0 0 24px rgba(215,67,162,.24); font-family: 'Barlow Condensed', sans-serif; font-size: 25px; letter-spacing: .06em; text-align: center; animation: flash .7s infinite alternate; }
 .empty-state { margin: 20px 0 0; color: var(--muted); font-size: 13px; }
 .team-list { display: grid; gap: 7px; margin-top: 18px; }
 .team-row { display: flex; justify-content: space-between; gap: 14px; padding: 12px 14px; border: 1px solid rgba(251,247,237,.1); border-radius: 6px; background: rgba(255,255,255,.035); }

@@ -79,6 +79,7 @@ function App() {
 
   const completedLines = useMemo(() => bingoLines.filter((line) => line.every((index) => marked.includes(index))), [bingoLines, marked]);
   const hasBingo = completedLines.length > 0;
+  const teamsWithBingo = teams.filter((team) => bingoLines.some((line) => line.every((index) => (team.marked_cells || []).includes(index))));
 
   useEffect(() => {
     const saved = getStoredState();
@@ -283,6 +284,7 @@ function App() {
         </section>
         <section className="teams-panel">
           <div className="teams-panel__header"><div><p className="eyebrow">Live room</p><h2>Teams in the room</h2></div><strong>{teams.length}/15</strong></div>
+          {teamsWithBingo.length > 0 && <div className="host-bingo-alert">BINGO! {teamsWithBingo.map((team) => team.name).join(', ')}</div>}
           {teams.length === 0 ? <p className="empty-state">Waiting for teams to join with the room code.</p> : <div className="team-list">{teams.map((team) => <div className="team-row" key={team.id}><span className="team-name">{team.name}</span><span className="team-progress">{(team.marked_cells || []).length}/25 marked</span></div>)}</div>}
         </section>
         <p className="micro-copy">Share room code <strong>{roomCode}</strong> with every team.</p>
