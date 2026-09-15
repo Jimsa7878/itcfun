@@ -340,7 +340,7 @@ function App() {
 
   const categoryByColor = Object.fromEntries(CATEGORIES.map((categoryItem) => [categoryItem.color, categoryItem]));
   return (
-    <main className="shell shell--game">
+    <main className="shell shell--game shell--team">
       <header className="game-header"><div className="brand"><span className="brand-dot">ITC</span><span>HITSTER BINGO</span></div><div className="room-pill">ROOM <strong>{roomCode}</strong></div></header>
       <section className={`round-strip round-strip--${remoteRound.phase} ${remoteRound.phase === 'running' && remoteRound.remaining <= 5 ? 'round-strip--warning' : ''}`}>
         <div><p className="eyebrow">Host challenge</p><strong>{remoteRound.category.name}</strong></div>
