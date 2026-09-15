@@ -338,7 +338,7 @@ function App() {
               <div className={`host-timer ${hostRound.phase === 'done' ? 'host-timer--done' : ''} ${hostRound.phase === 'countdown' && hostRound.remaining === 0 ? 'host-timer--go' : ''} ${hostRound.phase === 'running' && hostRound.remaining <= 5 ? 'host-timer--warning' : ''}`}>{countdownText}</div>
              </div>
           <p>{hostRound.phase === 'ready' ? 'Category ready. Start when every team is set.' : hostRound.phase === 'running' ? '45 seconds on the clock.' : hostRound.phase === 'countdown' ? 'Get ready...' : "Time's up. Reveal the answer out loud."}</p>
-          <div className="host-actions"><button className="button button--primary" onClick={newHostRound}>NEW CATEGORY</button></div>
+          <div className="host-actions"><button className="button button--primary" onClick={newHostRound}>START NEXT CATEGORY</button></div>
         </section>
         <section className="teams-panel">
           <div className="teams-panel__header"><div><p className="eyebrow">Live room</p><h2>Teams in the room</h2></div><strong>{teams.length}/15</strong></div>
