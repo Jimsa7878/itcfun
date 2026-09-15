@@ -66,7 +66,7 @@ h1 { margin: 0; font-family: 'Barlow Condensed', sans-serif; font-size: clamp(40
 .host-disco-ball--done { animation: disco-flash .42s ease-in-out infinite alternate; }
 .host-stage > p:not(.eyebrow) { color: var(--muted); }
 .host-timer { position: relative; z-index: 2; margin: 0; color: #fff8e8; font-family: 'Barlow Condensed', sans-serif; font-size: clamp(100px, 19vw, 190px); font-weight: 800; line-height: .76; font-variant-numeric: tabular-nums; text-shadow: 0 4px 0 rgba(39,29,63,.75), 0 0 22px rgba(255,226,102,.8); }
-.host-timer--done { color: #fff8e8; animation: pulse .65s ease-in-out infinite alternate; }
+.host-timer--done { display: flex; align-items: center; justify-content: center; width: 100%; color: #fff8e8; font-size: clamp(46px, 8vw, 86px); white-space: nowrap; animation: pulse .65s ease-in-out infinite alternate; }
 .host-timer--go { color: #f0c9ff; animation: pulse .35s ease-in-out infinite alternate; }
 .host-timer--warning { color: #ff596f; animation: flash .45s infinite alternate; text-shadow: 0 4px 0 rgba(72,8,28,.75), 0 0 28px rgba(255,45,82,.9); }
 .teams-panel { width: min(760px, 100%); margin: 0 auto; padding: 22px; border: 1px solid var(--line); border-radius: 12px; background: rgba(8,7,12,.76); }
