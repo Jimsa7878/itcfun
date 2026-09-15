@@ -314,7 +314,7 @@ function App() {
   if (view === 'host') {
     const countdownText = hostRound.phase === 'countdown' && hostRound.remaining === 0 ? 'GO' : hostRound.phase === 'done' ? "TIME'S UP" : hostRound.remaining;
     return (
-      <main className="shell shell--game">
+      <main className="shell shell--game shell--host">
         <header className="game-header"><div className="brand"><span className="brand-dot">ITC</span><span>HITSTER BINGO</span></div><div className="room-pill">ROOM <strong>{roomCode}</strong></div></header>
            <section className="host-stage host-stage--disco">
              <p className="panel-kicker">Next challenge</p>
