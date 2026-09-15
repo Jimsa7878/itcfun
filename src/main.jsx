@@ -323,7 +323,7 @@ function App() {
         <div><p className="eyebrow">Host challenge</p><strong>{remoteRound.category.name}</strong></div>
         <div className="round-strip__timer">{remoteRound.phase === 'done' ? "TIME'S UP" : remoteRound.phase === 'ready' ? 'READY' : remoteRound.phase === 'countdown' && remoteRound.remaining === 0 ? 'GO' : remoteRound.remaining}</div>
       </section>
-      <section className="board-header"><div><p className="eyebrow">Team board</p><h1>{teamName}</h1></div><div className={`bingo-badge ${hasBingo ? 'bingo-badge--active' : ''}`}>{hasBingo ? 'BINGO!' : `${completedLines.length} LINES`}</div></section>
+      <section className="board-header"><div><p className="eyebrow">Team board</p><h1>{teamName}</h1></div>{hasBingo && <div className="bingo-badge bingo-badge--active">BINGO!</div>}</section>
       <section className="legend">{CATEGORIES.map((categoryItem) => <span key={categoryItem.name}><i className={`swatch swatch--${categoryItem.color}`} />{categoryItem.name}</span>)}</section>
       <section className="board" aria-label={`${teamName} bingo board`}>{board.map((cell) => { const categoryItem = categoryByColor[cell.color]; return <button key={cell.id} className={`board-cell board-cell--${cell.color} ${marked.includes(cell.id) ? 'board-cell--marked' : ''}`} onClick={() => toggleCell(cell.id)} aria-label={`${categoryItem.name}, ${marked.includes(cell.id) ? 'marked' : 'unmarked'}`}><span>{categoryItem.icon}</span><small>{marked.includes(cell.id) ? 'DONE' : categoryItem.name}</small></button>; })}</section>
       <div className="board-actions"><button className="button button--secondary" onClick={resetBoard}>RESET MARKS</button><button className="text-button" onClick={leaveTeam}>Leave room</button></div>
