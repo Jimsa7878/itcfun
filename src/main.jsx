@@ -229,19 +229,20 @@ function App() {
   if (view === 'landing') {
     return (
       <main className="shell shell--landing">
-        <header className="brand"><span className="brand-dot">ITC</span><span>ITCFun</span></header>
-        <section className="hero">
-          <img className="disco-ball disco-ball--landing" src={DISCO_BALL_URL} alt="" aria-hidden="true" />
-          <p className="eyebrow">Digital team bingo</p>
-          <h1>Play the room.<br /><em>Own the board.</em></h1>
-          <p className="hero-copy">Create a room for your teams or join with a code. Every team gets its own randomized Hitster Bingo board.</p>
+        <header className="brand"><span className="brand-dot">ITC</span><span>ITC Hitster Bingo</span></header>
+        <section className="landing-stage">
+          <p className="panel-kicker">The music contest starts here</p>
+          <h1>Welcome to<br /><em>ITC Hitster Bingo</em></h1>
+          <div className="landing-disco-ball">
+            <img src={DISCO_BALL_URL} alt="" aria-hidden="true" />
+          </div>
+          <p className="landing-copy">Join the room to be part of the contest.</p>
           <div className="landing-actions">
             <button className="button button--primary" onClick={createHostRoom}>CREATE HOST ROOM</button>
-            <button className="button button--secondary" onClick={() => setView('join')}>JOIN A ROOM</button>
+            <button className="button button--secondary" onClick={() => setView('join')}>JOIN THE ROOM</button>
           </div>
           {message && <p className="form-message">{message}</p>}
         </section>
-        <footer className="micro-copy">Five PDF categories · Randomized team boards · Instant bingo</footer>
       </main>
     );
   }
