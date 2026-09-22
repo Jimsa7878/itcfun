@@ -79,12 +79,10 @@ h1 { margin: 0; font-family: 'Barlow Condensed', sans-serif; font-size: clamp(40
 .host-timer--go { color: #f0c9ff; animation: pulse .35s ease-in-out infinite alternate; }
 .host-timer--warning { color: #ff596f; animation: flash .45s infinite alternate; text-shadow: 0 4px 0 rgba(72,8,28,.75), 0 0 28px rgba(255,45,82,.9); }
 .teams-panel { width: min(760px, 100%); margin: 0 auto; padding: 22px; border: 1px solid var(--line); border-radius: 12px; background: rgba(8,7,12,.76); }
-.host-join-card { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 24px; padding-bottom: 22px; border-bottom: 1px solid var(--line); }
-.host-join-card__copy { min-width: 0; }
-.host-join-card__copy h2 { margin: 0 0 8px; font-family: 'Barlow Condensed', sans-serif; font-size: clamp(30px, 4vw, 42px); line-height: .9; text-transform: uppercase; }
-.host-join-card__copy p:not(.eyebrow) { margin: 0 0 12px; color: var(--muted); font-size: 12px; line-height: 1.45; }
-.host-join-card__copy code { display: block; color: var(--yellow); font-size: 10px; line-height: 1.4; overflow-wrap: anywhere; }
-.host-join-card__qr { flex: 0 0 132px; width: 132px; height: 132px; padding: 7px; border-radius: 5px; background: #fff8e8; }
+.host-join-card { display: flex; flex-direction: column; align-items: center; gap: 12px; margin-bottom: 24px; padding-bottom: 22px; border-bottom: 1px solid var(--line); text-align: center; }
+.host-join-card .eyebrow { margin-bottom: 0; }
+.host-join-card__qr { width: 132px; height: 132px; padding: 7px; border-radius: 5px; background: #fff8e8; }
+.host-join-card code { max-width: 100%; color: var(--yellow); font-size: 10px; line-height: 1.4; overflow-wrap: anywhere; }
 .teams-panel__header { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
 .teams-panel__header h2 { margin: 0; font-family: 'Barlow Condensed', sans-serif; font-size: clamp(26px, 4vw, 38px); line-height: .9; text-transform: uppercase; }
 .teams-panel__header > strong { color: var(--yellow); font-family: 'Barlow Condensed', sans-serif; font-size: 32px; }

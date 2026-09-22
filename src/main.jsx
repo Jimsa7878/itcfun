@@ -361,8 +361,9 @@ function App() {
         </section>
         <section className="teams-panel">
           <div className="host-join-card">
-            <div className="host-join-card__copy"><p className="eyebrow">Quick join</p><h2>Scan to play</h2><p>Players can scan this code to open the join page.</p><code>{JOIN_URL}</code></div>
+            <p className="eyebrow">Quick join</p>
             {joinQrCode && <img className="host-join-card__qr" src={joinQrCode} alt={`QR code for ${JOIN_URL}`} />}
+            <code>{JOIN_URL}</code>
           </div>
           <div className="teams-panel__header"><div><p className="eyebrow">Live room</p><h2>Teams in the room</h2></div><strong>{teams.length}/15</strong></div>
           {teamsWithBingo.length > 0 && <div className="host-bingo-alert">BINGO! {teamsWithBingo.map((team) => team.name).join(', ')}</div>}
