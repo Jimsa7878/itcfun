@@ -365,7 +365,7 @@ function App() {
             {joinQrCode && <img className="host-join-card__qr" src={joinQrCode} alt={`QR code for ${JOIN_URL}`} />}
             <code>{JOIN_URL}</code>
           </div>
-          <div className="teams-panel__header"><div><p className="eyebrow">Live room</p><h2>Teams in the room</h2></div><strong>{teams.length}/15</strong></div>
+          <div className="teams-panel__header"><p className="eyebrow">Live room</p><h2>Teams in the room</h2><strong>{teams.length}/15</strong></div>
           {teamsWithBingo.length > 0 && <div className="host-bingo-alert">BINGO! {teamsWithBingo.map((team) => team.name).join(', ')}</div>}
           {teams.length === 0 ? <p className="empty-state">Waiting for teams to join with the room code.</p> : <div className="team-list">{teams.map((team) => { const teamHasBingo = teamsWithBingo.some((winner) => winner.id === team.id); return <div className={`team-row ${teamHasBingo ? 'team-row--bingo' : ''}`} key={team.id}><span className="team-name">{team.name}{teamHasBingo && <strong className="team-row__bingo">BINGO!</strong>}</span><span className="team-progress">{(team.marked_cells || []).length}/25 marked</span></div>; })}</div>}
         </section>
