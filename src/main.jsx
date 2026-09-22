@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
+import QRCode from 'qrcode';
 import './styles.css';
 import { ensureAnonymousSession, supabase } from './lib/supabase';
 
@@ -15,6 +16,7 @@ const COUNTDOWN_SECONDS = 5;
 const BOARD_SIZE = 25;
 const STORAGE_KEY = 'itcfun-local-state';
 const DISCO_BALL_URL = `${import.meta.env.BASE_URL}discoball.gif`;
+const JOIN_URL = 'https://jimsa7878.github.io/itcfun';
 
 function hashSeed(value) {
   let hash = 2166136261;
@@ -66,6 +68,7 @@ function App() {
   const [marked, setMarked] = useState([]);
   const [message, setMessage] = useState('');
   const [authUserId, setAuthUserId] = useState(null);
+  const [joinQrCode, setJoinQrCode] = useState('');
   const [hostRound, setHostRound] = useState({ category: CATEGORIES[0], phase: 'ready', remaining: 45, duration: 45 });
   const [remoteRound, setRemoteRound] = useState({ category: CATEGORIES[0], phase: 'ready', remaining: 45, duration: 45 });
 
@@ -108,6 +111,12 @@ function App() {
       setBoard(createBoard(saved.roomCode, saved.teamName));
       setMarked(saved.marked || []);
     }
+  }, []);
+
+  useEffect(() => {
+    QRCode.toDataURL(JOIN_URL, { width: 220, margin: 1, color: { dark: '#0d0b13', light: '#fff8e8' } })
+      .then(setJoinQrCode)
+      .catch((error) => console.error('Join QR code generation failed:', error));
   }, []);
 
   useEffect(() => {
@@ -351,6 +360,10 @@ function App() {
           <div className="host-actions"><button className="button button--primary" onClick={newHostRound} disabled={['countdown', 'running'].includes(hostRound.phase)}>START NEXT CATEGORY</button><label className="duration-control"><span>ROUND TIME</span><select value={hostRound.duration || 45} onChange={changeRoundDuration} disabled={['countdown', 'running'].includes(hostRound.phase)}><option value={15}>15 SEC</option><option value={30}>30 SEC</option><option value={45}>45 SEC</option><option value={60}>60 SEC</option></select></label></div>
         </section>
         <section className="teams-panel">
+          <div className="host-join-card">
+            <div className="host-join-card__copy"><p className="eyebrow">Quick join</p><h2>Scan to play</h2><p>Players can scan this code to open the join page.</p><code>{JOIN_URL}</code></div>
+            {joinQrCode && <img className="host-join-card__qr" src={joinQrCode} alt={`QR code for ${JOIN_URL}`} />}
+          </div>
           <div className="teams-panel__header"><div><p className="eyebrow">Live room</p><h2>Teams in the room</h2></div><strong>{teams.length}/15</strong></div>
           {teamsWithBingo.length > 0 && <div className="host-bingo-alert">BINGO! {teamsWithBingo.map((team) => team.name).join(', ')}</div>}
           {teams.length === 0 ? <p className="empty-state">Waiting for teams to join with the room code.</p> : <div className="team-list">{teams.map((team) => { const teamHasBingo = teamsWithBingo.some((winner) => winner.id === team.id); return <div className={`team-row ${teamHasBingo ? 'team-row--bingo' : ''}`} key={team.id}><span className="team-name">{team.name}{teamHasBingo && <strong className="team-row__bingo">BINGO!</strong>}</span><span className="team-progress">{(team.marked_cells || []).length}/25 marked</span></div>; })}</div>}
