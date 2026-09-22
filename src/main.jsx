@@ -343,6 +343,7 @@ function App() {
 
   if (view === 'host') {
     const countdownText = hostRound.phase === 'countdown' && hostRound.remaining === 0 ? 'GO' : hostRound.phase === 'done' ? "TIME'S UP" : hostRound.remaining;
+    const rankedTeams = [...teams].sort((leftTeam, rightTeam) => (rightTeam.marked_cells || []).length - (leftTeam.marked_cells || []).length);
     return (
       <main className="shell shell--game shell--host">
         <header className="game-header"><div className="brand"><span className="brand-dot">ITC</span><span>HITSTER BINGO</span></div><div className="room-pill">ROOM <strong>{roomCode}</strong></div></header>
@@ -367,7 +368,8 @@ function App() {
           </div>
           <div className="teams-panel__header"><p className="eyebrow">Live room</p><h2>Teams in the room</h2><strong>{teams.length}/15</strong></div>
           {teamsWithBingo.length > 0 && <div className="host-bingo-alert">BINGO! {teamsWithBingo.map((team) => team.name).join(', ')}</div>}
-          {teams.length === 0 ? <p className="empty-state">Waiting for teams to join with the room code.</p> : <div className="team-list">{teams.map((team) => { const teamHasBingo = teamsWithBingo.some((winner) => winner.id === team.id); return <div className={`team-row ${teamHasBingo ? 'team-row--bingo' : ''}`} key={team.id}><span className="team-name">{team.name}{teamHasBingo && <strong className="team-row__bingo">BINGO!</strong>}</span><span className="team-progress">{(team.marked_cells || []).length}/25 marked</span></div>; })}</div>}
+          <div className="leaderboard-header"><p className="eyebrow">Leaderboard</p></div>
+          {teams.length === 0 ? <p className="empty-state">Waiting for teams to join with the room code.</p> : <div className="team-list">{rankedTeams.map((team, index) => { const teamHasBingo = teamsWithBingo.some((winner) => winner.id === team.id); return <div className={`team-row ${teamHasBingo ? 'team-row--bingo' : ''}`} key={team.id}><span className="team-rank">{index + 1}</span><span className="team-name">{team.name}{teamHasBingo && <strong className="team-row__bingo">BINGO!</strong>}</span><span className="team-progress">{(team.marked_cells || []).length}/25 marked</span></div>; })}</div>}
         </section>
       </main>
     );
