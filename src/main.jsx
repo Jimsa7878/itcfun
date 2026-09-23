@@ -16,7 +16,13 @@ const COUNTDOWN_SECONDS = 5;
 const BOARD_SIZE = 25;
 const STORAGE_KEY = 'itcfun-local-state';
 const DISCO_BALL_URL = `${import.meta.env.BASE_URL}discoball.gif`;
-const JOIN_URL = 'https://jimsa7878.github.io/itcfun';
+const JOIN_URL = 'https://jimsa7878.github.io/itcfun/';
+
+function getJoinUrl(roomCode = '') {
+  const url = new URL(JOIN_URL);
+  if (roomCode) url.searchParams.set('room', roomCode);
+  return url.toString();
+}
 
 function hashSeed(value) {
   let hash = 2166136261;
@@ -71,6 +77,7 @@ function App() {
   const [joinQrCode, setJoinQrCode] = useState('');
   const [hostRound, setHostRound] = useState({ category: CATEGORIES[0], phase: 'ready', remaining: 45, duration: 45 });
   const [remoteRound, setRemoteRound] = useState({ category: CATEGORIES[0], phase: 'ready', remaining: 45, duration: 45 });
+  const joinUrl = view === 'host' && roomCode ? getJoinUrl(roomCode) : JOIN_URL;
 
   const bingoLines = useMemo(() => {
     const lines = [];
@@ -103,7 +110,13 @@ function App() {
   }, []);
 
   useEffect(() => {
+    const qrRoomCode = new URLSearchParams(window.location.search).get('room')?.replace(/\D/g, '').slice(0, 4);
     const saved = getStoredState();
+    if (qrRoomCode) {
+      setRoomCode(qrRoomCode);
+      setView('join');
+      return;
+    }
     if (saved.view === 'team' && saved.roomCode && saved.teamName) {
       setView('team');
       setRoomCode(saved.roomCode);
@@ -114,10 +127,10 @@ function App() {
   }, []);
 
   useEffect(() => {
-    QRCode.toDataURL(JOIN_URL, { width: 220, margin: 1, color: { dark: '#0d0b13', light: '#fff8e8' } })
+    QRCode.toDataURL(joinUrl, { width: 220, margin: 1, color: { dark: '#0d0b13', light: '#fff8e8' } })
       .then(setJoinQrCode)
       .catch((error) => console.error('Join QR code generation failed:', error));
-  }, []);
+  }, [joinUrl]);
 
   useEffect(() => {
     if (view === 'team' && roomCode && teamName) {
@@ -363,8 +376,8 @@ function App() {
         <section className="teams-panel">
           <div className="host-join-card">
             <p className="eyebrow">Quick join</p>
-            {joinQrCode && <img className="host-join-card__qr" src={joinQrCode} alt={`QR code for ${JOIN_URL}`} />}
-            <code>{JOIN_URL}</code>
+            {joinQrCode && <img className="host-join-card__qr" src={joinQrCode} alt={`QR code for ${joinUrl}`} />}
+            <code>{joinUrl}</code>
           </div>
           <div className="teams-panel__header"><p className="eyebrow">Live room</p><h2>Teams in the room</h2><strong>{teams.length}/15</strong></div>
           {teamsWithBingo.length > 0 && <div className="host-bingo-alert">BINGO! {teamsWithBingo.map((team) => team.name).join(', ')}</div>}
