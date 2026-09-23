@@ -7,6 +7,7 @@ button, input { font: inherit; }
 button { -webkit-tap-highlight-color: transparent; }
 .shell { position: relative; width: min(1150px, 100%); min-height: 100svh; margin: 0 auto; padding: 28px clamp(18px, 5vw, 72px); display: flex; flex-direction: column; }
 .shell--landing { justify-content: space-between; }
+@media (min-width: 601px) { .shell--landing { justify-content: flex-start; } .shell--landing .landing-stage { margin-top: clamp(72px, 10vh, 120px); } }
 .shell--centered { align-items: center; }
 .shell--game { gap: 24px; }
 .shell--host { display: grid; grid-template-columns: minmax(0, 1fr) minmax(250px, 300px); align-content: start; }
