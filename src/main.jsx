@@ -286,7 +286,8 @@ function App() {
   };
 
   const newHostRound = async () => {
-    const nextRound = { category: CATEGORIES[Math.floor(Math.random() * CATEGORIES.length)], phase: 'countdown', remaining: COUNTDOWN_SECONDS, duration: hostRound.duration || 45 };
+    const category = hostRound.phase === 'ready' ? hostRound.category : CATEGORIES[Math.floor(Math.random() * CATEGORIES.length)];
+    const nextRound = { category, phase: 'countdown', remaining: COUNTDOWN_SECONDS, duration: hostRound.duration || 45 };
     setHostRound(nextRound);
     await saveRound(nextRound);
   };
