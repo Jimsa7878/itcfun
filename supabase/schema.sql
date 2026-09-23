@@ -49,6 +49,64 @@ create table if not exists public.teams (
 create index if not exists teams_room_id_idx on public.teams(room_id);
 
 alter table public.teams add column if not exists user_id uuid;
+alter table public.teams add column if not exists bingo_rank integer;
+
+create or replace function public.update_team_marks(target_team_id uuid, next_marked_cells integer[])
+returns table (id uuid, name text, marked_cells integer[], bingo_rank integer)
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  target_room_id uuid;
+  current_bingo_rank integer;
+  next_bingo_rank integer;
+  has_bingo boolean;
+begin
+  select teams.room_id, teams.bingo_rank
+    into target_room_id, current_bingo_rank
+    from public.teams
+   where teams.id = target_team_id
+     and teams.user_id = auth.uid();
+
+  if target_room_id is null then
+    raise exception 'Team not found or access denied';
+  end if;
+
+  has_bingo := next_marked_cells @> array[0, 1, 2, 3, 4]
+    or next_marked_cells @> array[5, 6, 7, 8, 9]
+    or next_marked_cells @> array[10, 11, 12, 13, 14]
+    or next_marked_cells @> array[15, 16, 17, 18, 19]
+    or next_marked_cells @> array[20, 21, 22, 23, 24]
+    or next_marked_cells @> array[0, 5, 10, 15, 20]
+    or next_marked_cells @> array[1, 6, 11, 16, 21]
+    or next_marked_cells @> array[2, 7, 12, 17, 22]
+    or next_marked_cells @> array[3, 8, 13, 18, 23]
+    or next_marked_cells @> array[4, 9, 14, 19, 24]
+    or next_marked_cells @> array[0, 6, 12, 18, 24]
+    or next_marked_cells @> array[4, 8, 12, 16, 20];
+
+  if current_bingo_rank is null and has_bingo then
+    perform pg_advisory_xact_lock(hashtextextended(target_room_id::text, 0));
+    select coalesce(max(teams.bingo_rank), 0) + 1
+      into next_bingo_rank
+      from public.teams
+     where teams.room_id = target_room_id;
+  end if;
+
+  update public.teams
+     set marked_cells = next_marked_cells,
+         bingo_rank = coalesce(current_bingo_rank, next_bingo_rank)
+   where teams.id = target_team_id;
+
+  return query
+  select teams.id, teams.name, teams.marked_cells, teams.bingo_rank
+    from public.teams
+   where teams.id = target_team_id;
+end;
+$$;
+
+grant execute on function public.update_team_marks(uuid, integer[]) to authenticated;
 
 alter table public.rooms enable row level security;
 alter table public.teams enable row level security;

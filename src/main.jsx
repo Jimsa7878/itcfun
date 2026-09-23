@@ -63,6 +63,16 @@ function getStoredState() {
   }
 }
 
+function getTeamProgress(team, bingoLines) {
+  const markedCells = team.marked_cells || [];
+  const lineLengths = bingoLines.map((line) => line.filter((index) => markedCells.includes(index)).length);
+  return {
+    hasBingo: lineLengths.includes(5),
+    counts: [1, 2, 3, 4].map((length) => lineLengths.filter((lineLength) => lineLength === length).length),
+    total: markedCells.length
+  };
+}
+
 function App() {
   const [view, setView] = useState('landing');
   const [roomCode, setRoomCode] = useState('');
@@ -92,7 +102,6 @@ function App() {
 
   const completedLines = useMemo(() => bingoLines.filter((line) => line.every((index) => marked.includes(index))), [bingoLines, marked]);
   const hasBingo = completedLines.length > 0;
-  const teamsWithBingo = teams.filter((team) => bingoLines.some((line) => line.every((index) => (team.marked_cells || []).includes(index))));
 
   useEffect(() => {
     let active = true;
@@ -189,7 +198,7 @@ function App() {
     if (view !== 'host' || !hostRoomId) return undefined;
     let active = true;
     const loadTeams = async () => {
-      const { data } = await supabase.from('teams').select('id, name, marked_cells').eq('room_id', hostRoomId).order('created_at');
+      const { data } = await supabase.from('teams').select('id, name, marked_cells, bingo_rank').eq('room_id', hostRoomId).order('created_at');
       if (active) setTeams(data || []);
     };
     loadTeams();
@@ -198,7 +207,7 @@ function App() {
         setTeams((current) => current.filter((team) => team.id !== payload.old.id));
         return;
       }
-      const nextTeam = { id: payload.new.id, name: payload.new.name, marked_cells: payload.new.marked_cells || [] };
+      const nextTeam = { id: payload.new.id, name: payload.new.name, marked_cells: payload.new.marked_cells || [], bingo_rank: payload.new.bingo_rank };
       setTeams((current) => {
         const existing = current.some((team) => team.id === nextTeam.id);
         if (!existing) return [...current, nextTeam];
@@ -303,12 +312,18 @@ function App() {
   const toggleCell = async (cellId) => {
     const nextMarked = marked.includes(cellId) ? marked.filter((id) => id !== cellId) : [...marked, cellId];
     setMarked(nextMarked);
-    if (teamId && authUserId) await supabase.from('teams').update({ marked_cells: nextMarked }).eq('id', teamId).eq('user_id', authUserId);
+    if (teamId && authUserId) {
+      const { error } = await supabase.rpc('update_team_marks', { target_team_id: teamId, next_marked_cells: nextMarked });
+      if (error) setMessage(error.message);
+    }
   };
 
   const resetBoard = async () => {
     setMarked([]);
-    if (teamId && authUserId) await supabase.from('teams').update({ marked_cells: [] }).eq('id', teamId).eq('user_id', authUserId);
+    if (teamId && authUserId) {
+      const { error } = await supabase.rpc('update_team_marks', { target_team_id: teamId, next_marked_cells: [] });
+      if (error) setMessage(error.message);
+    }
   };
   const leaveTeam = () => {
     window.localStorage.removeItem(STORAGE_KEY);
@@ -357,7 +372,14 @@ function App() {
 
   if (view === 'host') {
     const countdownText = hostRound.phase === 'countdown' && hostRound.remaining === 0 ? 'GO' : hostRound.phase === 'done' ? "TIME'S UP" : hostRound.remaining;
-    const rankedTeams = [...teams].sort((leftTeam, rightTeam) => (rightTeam.marked_cells || []).length - (leftTeam.marked_cells || []).length);
+    const teamProgress = teams.map((team) => ({ team, progress: getTeamProgress(team, bingoLines) }));
+    const bingoWinners = teamProgress.filter(({ team }) => team.bingo_rank).sort((left, right) => left.team.bingo_rank - right.team.bingo_rank);
+    const rankedTeams = teamProgress.filter(({ team, progress }) => !team.bingo_rank && !progress.hasBingo).sort((left, right) => {
+      for (let index = 3; index >= 0; index -= 1) {
+        if (right.progress.counts[index] !== left.progress.counts[index]) return right.progress.counts[index] - left.progress.counts[index];
+      }
+      return right.progress.total - left.progress.total;
+    });
     return (
       <main className="shell shell--game shell--host">
         <header className="game-header"><div className="brand"><span className="brand-dot">ITC</span><span>HITSTER BINGO</span></div><div className="room-pill">ROOM <strong>{roomCode}</strong></div></header>
@@ -381,9 +403,9 @@ function App() {
             <code>{joinUrl}</code>
           </div>
           <div className="teams-panel__header"><p className="eyebrow">Live room</p><h2>Teams in the room</h2><strong>{teams.length}/15</strong></div>
-          {teamsWithBingo.length > 0 && <div className="host-bingo-alert">BINGO! {teamsWithBingo.map((team) => team.name).join(', ')}</div>}
-          <div className="leaderboard-header"><p className="eyebrow">Leaderboard</p></div>
-          {teams.length === 0 ? <p className="empty-state">Waiting for teams to join with the room code.</p> : <div className="team-list">{rankedTeams.map((team, index) => { const teamHasBingo = teamsWithBingo.some((winner) => winner.id === team.id); return <div className={`team-row ${teamHasBingo ? 'team-row--bingo' : ''}`} key={team.id}><span className="team-rank">{index + 1}</span><span className="team-name">{team.name}{teamHasBingo && <strong className="team-row__bingo">BINGO!</strong>}</span><span className="team-progress">{(team.marked_cells || []).length}/25 marked</span></div>; })}</div>}
+          {bingoWinners.length > 0 && <><div className="leaderboard-header"><p className="eyebrow">Bingo winners</p></div><div className="team-list">{bingoWinners.map(({ team }) => <div className="team-row team-row--bingo" key={team.id}><span className="team-rank">{team.bingo_rank}</span><span className="team-name">{team.name}</span><span className="team-progress">BINGO</span></div>)}</div></>}
+          <div className="leaderboard-header"><p className="eyebrow">Bingo progress</p></div>
+          {teams.length === 0 ? <p className="empty-state">Waiting for teams to join with the room code.</p> : rankedTeams.length === 0 ? <p className="empty-state">All teams have bingo.</p> : <div className="team-list">{rankedTeams.map(({ team, progress }, index) => { const progressSummary = [4, 3, 2, 1].map((length, summaryIndex) => progress.counts[3 - summaryIndex] ? `${progress.counts[3 - summaryIndex]} at ${length}/5` : '').filter(Boolean).join(' · '); return <div className="team-row" key={team.id}><span className="team-rank">{index + 1}</span><span className="team-name">{team.name}</span><span className="team-progress">{progressSummary || `${progress.total}/25 marked`}</span></div>; })}</div>}
         </section>
       </main>
     );

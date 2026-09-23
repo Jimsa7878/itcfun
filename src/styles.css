@@ -96,9 +96,9 @@ h1 { margin: 0; font-family: 'Barlow Condensed', sans-serif; font-size: clamp(40
 .team-row { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border: 1px solid rgba(251,247,237,.1); border-radius: 6px; background: rgba(255,255,255,.035); }
 .team-row--bingo { border-color: rgba(215,67,162,.72); background: rgba(155,120,207,.16); box-shadow: 0 0 18px rgba(215,67,162,.16); }
 .team-rank { width: 22px; color: var(--yellow); font-family: 'Barlow Condensed', sans-serif; font-size: 22px; line-height: .8; text-align: center; }
-.team-name { font-weight: 700; }
+.team-name { min-width: 0; font-weight: 700; overflow-wrap: anywhere; }
 .team-row__bingo { margin-left: 10px; color: #f0c9ff; font-size: 11px; letter-spacing: .08em; }
-.team-progress { margin-left: auto; color: var(--muted); font-size: 12px; white-space: nowrap; }
+.team-progress { margin-left: auto; color: var(--muted); font-size: 12px; text-align: right; white-space: nowrap; }
 .round-strip { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 16px 20px; border: 1px solid var(--line); border-radius: 10px; background: #08070c; }
 .round-strip strong { font-family: 'Barlow Condensed', sans-serif; font-size: clamp(28px, 5vw, 48px); line-height: .85; }
 .round-strip__timer { color: var(--orange); font-family: 'Barlow Condensed', sans-serif; font-size: clamp(36px, 6vw, 60px); font-weight: 800; line-height: .8; font-variant-numeric: tabular-nums; }
