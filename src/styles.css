@@ -108,6 +108,11 @@ h1 { margin: 0; font-family: 'Barlow Condensed', sans-serif; font-size: clamp(40
 .board-header h1 { font-size: clamp(45px, 8vw, 88px); }
 .bingo-badge { padding: 12px 15px; color: var(--muted); border: 1px solid var(--line); border-radius: 6px; font-size: 12px; font-weight: 700; letter-spacing: .1em; }
 .bingo-badge--active { color: #181119; border-color: var(--yellow); background: var(--yellow); animation: flash .7s infinite alternate; }
+.bingo-confirmation { display: grid; justify-items: center; gap: 10px; margin: 0 auto 18px; padding: 16px; color: #fff8ff; border: 1px solid rgba(215,67,162,.72); border-radius: 8px; background: rgba(155,120,207,.16); box-shadow: 0 0 22px rgba(215,67,162,.16); text-align: center; }
+.bingo-confirmation strong { color: var(--yellow); font-family: 'Barlow Condensed', sans-serif; font-size: 30px; letter-spacing: .08em; }
+.bingo-confirmation span { color: var(--muted); font-size: 12px; }
+.bingo-confirmation > div { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.bingo-confirmation .button { min-height: 40px; padding: 0 13px; font-size: 10px; }
 .legend { display: flex; flex-wrap: wrap; gap: 10px 18px; color: var(--muted); font-size: 11px; }
 .legend span { display: inline-flex; align-items: center; gap: 6px; }
 .swatch { width: 10px; height: 10px; border-radius: 2px; }

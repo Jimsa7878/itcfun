@@ -51,7 +51,8 @@ create index if not exists teams_room_id_idx on public.teams(room_id);
 alter table public.teams add column if not exists user_id uuid;
 alter table public.teams add column if not exists bingo_rank integer;
 
-create or replace function public.update_team_marks(target_team_id uuid, next_marked_cells integer[])
+drop function if exists public.update_team_marks(uuid, integer[]);
+create or replace function public.update_team_marks(target_team_id uuid, next_marked_cells integer[], claim_bingo boolean default false)
 returns table (id uuid, name text, marked_cells integer[], bingo_rank integer)
 language plpgsql
 security definer
@@ -86,7 +87,7 @@ begin
     or next_marked_cells @> array[0, 6, 12, 18, 24]
     or next_marked_cells @> array[4, 8, 12, 16, 20];
 
-  if current_bingo_rank is null and has_bingo then
+  if current_bingo_rank is null and has_bingo and claim_bingo then
     perform pg_advisory_xact_lock(hashtextextended(target_room_id::text, 0));
     select coalesce(max(teams.bingo_rank), 0) + 1
       into next_bingo_rank
@@ -109,7 +110,7 @@ begin
 end;
 $$;
 
-grant execute on function public.update_team_marks(uuid, integer[]) to authenticated;
+grant execute on function public.update_team_marks(uuid, integer[], boolean) to authenticated;
 
 alter table public.rooms enable row level security;
 alter table public.teams enable row level security;

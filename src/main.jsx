@@ -82,6 +82,7 @@ function App() {
   const [teamId, setTeamId] = useState(null);
   const [board, setBoard] = useState([]);
   const [marked, setMarked] = useState([]);
+  const [pendingBingoCellId, setPendingBingoCellId] = useState(null);
   const [message, setMessage] = useState('');
   const [authUserId, setAuthUserId] = useState(null);
   const [joinQrCode, setJoinQrCode] = useState('');
@@ -309,21 +310,41 @@ function App() {
     saveRound(nextRound);
   };
 
+  const saveTeamMarks = async (nextMarked, claimBingo = false) => {
+    if (!teamId || !authUserId) return;
+    const { error } = await supabase.rpc('update_team_marks', { target_team_id: teamId, next_marked_cells: nextMarked, claim_bingo: claimBingo });
+    if (error) setMessage(error.message);
+  };
+
   const toggleCell = async (cellId) => {
+    if (pendingBingoCellId !== null) return;
     const nextMarked = marked.includes(cellId) ? marked.filter((id) => id !== cellId) : [...marked, cellId];
     setMarked(nextMarked);
-    if (teamId && authUserId) {
-      const { error } = await supabase.rpc('update_team_marks', { target_team_id: teamId, next_marked_cells: nextMarked });
-      if (error) setMessage(error.message);
+    const createsBingo = !marked.includes(cellId) && bingoLines.some((line) => line.every((index) => nextMarked.includes(index)));
+    if (createsBingo) {
+      setPendingBingoCellId(cellId);
+      return;
     }
+    await saveTeamMarks(nextMarked);
+  };
+
+  const confirmBingo = async () => {
+    await saveTeamMarks(marked, true);
+    setPendingBingoCellId(null);
+  };
+
+  const undoPendingBingo = async () => {
+    if (pendingBingoCellId === null) return;
+    const nextMarked = marked.filter((id) => id !== pendingBingoCellId);
+    setMarked(nextMarked);
+    setPendingBingoCellId(null);
+    await saveTeamMarks(nextMarked);
   };
 
   const resetBoard = async () => {
     setMarked([]);
-    if (teamId && authUserId) {
-      const { error } = await supabase.rpc('update_team_marks', { target_team_id: teamId, next_marked_cells: [] });
-      if (error) setMessage(error.message);
-    }
+    setPendingBingoCellId(null);
+    await saveTeamMarks([]);
   };
   const leaveTeam = () => {
     window.localStorage.removeItem(STORAGE_KEY);
@@ -419,7 +440,8 @@ function App() {
         <div><p className="eyebrow">{remoteRound.phase === 'countdown' ? 'Get ready' : 'Host challenge'}</p><strong>{remoteRound.category.name}</strong></div>
         <div className="round-strip__timer">{remoteRound.phase === 'done' ? "TIME'S UP" : remoteRound.phase === 'ready' ? 'READY' : remoteRound.phase === 'countdown' && remoteRound.remaining === 0 ? 'GO' : remoteRound.remaining}</div>
       </section>
-      <section className="board-header"><div><p className="eyebrow">Team board</p><h1>{teamName}</h1></div>{hasBingo && <div className="bingo-badge bingo-badge--active">BINGO!</div>}</section>
+      <section className="board-header"><div><p className="eyebrow">Team board</p><h1>{teamName}</h1></div>{hasBingo && pendingBingoCellId === null && <div className="bingo-badge bingo-badge--active">BINGO!</div>}</section>
+      {pendingBingoCellId !== null && <div className="bingo-confirmation" role="alert"><strong>BINGO?</strong><span>Confirm your winning line.</span><div><button className="button button--primary" onClick={confirmBingo}>CONFIRM BINGO</button><button className="button button--secondary" onClick={undoPendingBingo}>UNDO LAST MARK</button></div></div>}
       <section className="legend">{CATEGORIES.map((categoryItem) => <span key={categoryItem.name}><i className={`swatch swatch--${categoryItem.color}`} />{categoryItem.name}</span>)}</section>
       <section className="board" aria-label={`${teamName} bingo board`}>{board.map((cell) => { const categoryItem = categoryByColor[cell.color]; return <button key={cell.id} className={`board-cell board-cell--${cell.color} ${marked.includes(cell.id) ? 'board-cell--marked' : ''}`} onClick={() => toggleCell(cell.id)} aria-label={`${categoryItem.name}, ${marked.includes(cell.id) ? 'marked' : 'unmarked'}`}><span>{categoryItem.icon}</span><small>{marked.includes(cell.id) ? 'DONE' : categoryItem.name}</small></button>; })}</section>
       <div className="board-actions"><button className="button button--secondary" onClick={resetBoard}>RESET MARKS</button><button className="text-button" onClick={leaveTeam}>Leave room</button></div>
