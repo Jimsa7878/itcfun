@@ -96,7 +96,10 @@ begin
 
   update public.teams
      set marked_cells = next_marked_cells,
-         bingo_rank = coalesce(current_bingo_rank, next_bingo_rank)
+         bingo_rank = case
+           when cardinality(next_marked_cells) = 0 then null
+           else coalesce(current_bingo_rank, next_bingo_rank)
+         end
    where teams.id = target_team_id;
 
   return query
